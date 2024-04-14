@@ -38,6 +38,8 @@ def login_page(request):
 
 
 def register_page(request):
+    if request.user.is_authenticated:
+        return redirect("home")
     page = "register"
     form = UserCreationForm()
 
@@ -49,7 +51,8 @@ def register_page(request):
             user.save()
             login(request, user)
             return redirect("home")
-    
+        else:
+            messages.error(request, "An error occured during registration")
 
     return render(
         request,
@@ -92,10 +95,13 @@ def room(request, pk):
 @login_required(login_url="login")
 def create_room(request):
     form = RoomForm()
+
     if request.method == "POST":
         form = RoomForm(request.POST)
+
         if form.is_valid():
             form.save()
+
             return redirect("home")
 
     context = {"form": form}
